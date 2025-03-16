@@ -1,0 +1,121 @@
+body {
+    background-image: url('assets/arcade.png');
+    background-size: 100vw 110vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Roboto", sans-serif; /* Aplica Roboto como fuente principal */
+}
+
+.contenedor-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.titulo {
+    text-align: center;
+    margin-bottom: 30px; /* Ajuste de espacio */
+    margin-top: -80px; /* Mueve el título ligeramente hacia arriba */
+}
+
+.titulo img {
+    max-width: 80%;
+    height: auto;
+}
+
+/* === Estilos para el formulario === */
+.formulario-registro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* Espacio entre elementos */
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.campo-usuario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.campo-usuario label {
+    font-family: "Micro 5", sans-serif; /* Usa la fuente Micro 5 en etiquetas */
+    font-size: 40px;
+    color: rgb(146, 9, 9);
+}
+
+.usuario {
+    padding-bottom: 20px
+}
+
+.campo-usuario input {
+    width: 250px;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.campo-usuario input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.campo-usuario input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: #00ffff;
+}
+
+/* === Estilos para los botones del menú principal === */
+.botones {
+    display: flex;
+    flex-direction: column; /* Cambiado a columna para alineación vertical */
+    align-items: center;
+    gap: 20px; /* Espacio entre botones */
+    margin-top: 10px;
+}
+
+.botones a {
+    width: 180px; /* Ancho fijo para todos los enlaces */
+    height: 50px; /* Altura fija para todos los enlaces */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* Estilos para el botón comenzar en la página de registro */
+.boton-comenzar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.boton-comenzar:hover {
+    transform: scale(1.1);
+}
+
+.boton-img {
+    width: 150px;
+    height: auto;
+    transition: transform 0.2s ease;
+}
+
+/* Efecto hover para las imágenes de botones */
+a:hover .boton-img {
+    transform: scale(1.1);
+}

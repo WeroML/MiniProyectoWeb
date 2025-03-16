@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2 Noches con Alfredo</title>
+    <link rel="stylesheet" href="estilosMenu.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Micro+5&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="contenedor-menu">
+        <div class="titulo">
+            <img src="assets/titulo.png" alt="Titulo del juego">
+        </div>
+
+        <div class="formulario-registro">
+            <div class="campo-usuario">
+                <div class="usuario">
+                <label for="nombreUsuario">USUARIO</label>
+                </div>
+                <input type="text" id="nombreUsuario" placeholder="Ingresa tu nombre aquí">
+            </div>
+            
+            <div class="botones">
+                <button id="btnComenzar" class="boton-comenzar">
+                    <img src="assets/registro.png" alt="Comenzar" class="boton-img">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('btnComenzar').addEventListener('click', function() 
+        {
+            const nombreUsuario = document.getElementById('nombreUsuario').value.trim();
+
+            //La regex valida el nombre de usuario:
+            //^ Inicio de la cadena  
+            //[a-zA-Z0-9_] Acepta solo letras (mayúsculas y minúsculas), números y el guión bajo (_)
+            //{4,8} Longitud mínima de 4 caracteres y máxima de 8 caracteres
+            //$ Fin de la cadena  
+            //test(nombreUsuario) devuelve true si el nombre de usuario cumple con la regex, y false si no  
+            //if(!) Si no cumple con la regex, ejecuta el pedazo de código
+
+            if(!/^[a-zA-Z0-9_]{4,8}$/.test(nombreUsuario))
+            {
+                let mensaje = '';
+                if(nombreUsuario.length < 4 || nombreUsuario.length > 8) 
+                {
+                    mensaje += 'El alias debe tener entre 4 y 8 caracteres.<br>';
+                }
+                if(!/^[a-zA-Z0-9_]+$/.test(nombreUsuario)) 
+                {
+                    mensaje += 'Sólo se permiten letras, números y guión bajo.<br>';
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Alias inválido',
+                    html: mensaje,
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+
+            //Validar si el alias ya existe en localStorage
+            if(localStorage.getItem(nombreUsuario) !== null) 
+            {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Alias existente',
+                    text: 'Este alias ya está registrado. Elige otro.',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+
+            //Guardar el alias si es valido y no existe previamente
+            localStorage.setItem('nombreJugador', nombreUsuario);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Registro exitoso!',
+                text: `Bienvenido ${nombreUsuario}!`,
+                confirmButtonText: 'Continuar'
+            }).then(() => {
+                window.location.href = 'menu.html';
+            });
+        });
+    </script>
+</body>
+</html>

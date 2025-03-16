@@ -1,0 +1,97 @@
+.contenedor-instrucciones {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    border: 3px solid rgb(65, 19, 19);
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    color: rgb(255, 255, 255);
+    font-family: "Micro 5", "Press Start 2P", sans-serif;
+}
+
+
+
+.lista-instrucciones {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.lista-instrucciones li {
+    padding: 12px 10px;
+    align-items: center;
+    border-bottom: 2px dashed rgba(255, 107, 107, 0.3);
+    font-size: 25px;
+    transition: transform 0.2s, background-color 0.3s;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.lista-instrucciones li:hover {
+    background-color: rgba(255, 107, 107, 0.15);
+    transform: translateX(5px);
+}
+
+
+/* Animación para dar énfasis a los objetivos */
+@keyframes pulso {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.lista-instrucciones li:nth-child(7),
+.lista-instrucciones li:nth-child(8) {
+    background-color: rgba(255, 255, 0, 0.1);
+    border: 1px solid rgba(255, 255, 0, 0.3);
+    animation: pulso 2s infinite;
+}
+
+.volver {
+    margin-top: 25px;
+}
+
+.volver img {
+    width: 160px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 10px rgb(145, 10, 10));
+}
+
+.volver img:hover {
+    transform: scale(1.15) rotate(-2deg);
+    filter: drop-shadow(0 0 10px rgb(145, 10, 10));
+}
+
+.contenedor-instrucciones h2 {
+    color: rgb(146, 9, 9);
+    text-shadow: 0 0 10px rgba(161, 1, 1, 0.7), 0 0 20px rgba(255, 0, 0, 0.4);
+    text-align: center;
+    font-size: 60px;
+    margin-bottom: 20px;
+    font-family: "Micro 5", "Press Start 2P", sans-serif;
+    letter-spacing: 2px;
+}
+
+/* Elementos destacados con colores relacionados con el juego */
+.puntos-destacados {
+    color: #ffde59;
+    font-weight: bold;
+}
+
+.vida-destacada {
+    color: #ff5252;
+    font-weight: bold;
+}
+
+/* Efecto de brillo para el título */
+/*@keyframes neon {
+    0% { text-shadow: 0 0 5px #ff6b6b, 0 0 10px #ff6b6b; }
+    50% { text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b, 0 0 30px #ff6b6b; }
+    100% { text-shadow: 0 0 5px #ff6b6b, 0 0 10px #ff6b6b; }
+}
+
+.instrucciones-titulo {
+    animation: neon 1.5s infinite alternate;
+}*/

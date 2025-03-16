@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Records - Juego Arcade</title>
+    <link rel="stylesheet" href="estilosRecords.css">
+    <link href="https://fonts.googleapis.com/css2?family=Micro+5&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
+</head>
+<body>
+    <div class="contenedor-records">
+        <div class="titulo">
+            <img src="assets/titulo.png" alt="Titulo del juego">
+        </div>
+
+        <div class="tabla-records">
+            <h2>MEJORES PUNTAJES</h2>
+            <table id="tabla-puntajes">
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Jugador</th>
+                        <th>Puntaje</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla">
+                    <!-- Puntajes localStorage -->
+                </tbody>
+            </table>
+            <div class="mensaje" style="display: none;">
+               <p id="mensaje-vacio" class="mensaje-vacio">Aún no hay puntajes registrados. ¡Sé el primero en jugar!</p> 
+            </div>
+        </div>
+
+        <a href="menu.html" class="boton-volver">
+            <img src="assets/volverAlMenu.png" alt="Volver al menú">
+        </a>
+    </div>
+
+    <script>
+       
+        function cargarPuntajes() {
+            const tablaCuerpo = document.getElementById('cuerpo-tabla');
+            const mensajeVacio = document.getElementById('mensaje-vacio');
+            
+
+            let puntajes = [];
+
+            //Recuperar los puntajes guardados
+            const puntajesGuardados = localStorage.getItem('puntajes');
+                
+            if(puntajesGuardados) {
+
+                puntajes = JSON.parse(puntajesGuardados);
+                    
+                puntajes.sort((a, b) => b.puntaje - a.puntaje);
+            }
+
+            
+            //Mostrar mensaje si no hay puntajes
+            if (puntajes.length === 0) {
+                mensajeVacio.style.display = 'block'; // Asegurar que el mensaje se muestra
+                mensajeVacio.parentElement.style.display = 'block'; // Hacer visible el contenedor
+                document.getElementById('tabla-puntajes').style.display = 'none';
+                return;
+            }
+
+            
+            //Limpiar la tabla antes de agregar nuevos datos
+            tablaCuerpo.innerHTML = '';
+            
+            //Agregar puntajes
+            puntajes.forEach((jugador, index) => {
+                const fila = document.createElement('tr');
+                
+                //Crear celda para la posición
+                const celdaPosicion = document.createElement('td');
+                celdaPosicion.classList.add('posicion');
+                
+                if(index === 0) celdaPosicion.classList.add('primer-lugar');
+                if(index === 1) celdaPosicion.classList.add('segundo-lugar');
+                if(index === 2) celdaPosicion.classList.add('tercer-lugar');
+                
+                celdaPosicion.textContent = index + 1;
+                
+                //Nombre del jugador
+                const celdaNombre = document.createElement('td');
+                celdaNombre.textContent = jugador.nombre;
+                
+                //Crear celda para el puntaje
+                const celdaPuntaje = document.createElement('td');
+                celdaPuntaje.textContent = jugador.puntaje;
+                
+                //Agregar celdas a la fila
+                fila.appendChild(celdaPosicion);
+                fila.appendChild(celdaNombre);
+                fila.appendChild(celdaPuntaje);
+                
+                //Agregar fila a la tabla
+                tablaCuerpo.appendChild(fila);
+            });
+        }
+        
+        //Cargar los puntajes cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', cargarPuntajes);
+    </script>
+</body>
+</html>

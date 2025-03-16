@@ -1,0 +1,807 @@
+<!doctype html> <html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>2 Noches con Alfredo</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Micro+5&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="estilosJuego.css">
+</head>
+<body>
+<div id="contenedorJuego">
+<script type="text/javascript">
+
+var config = {
+    type: Phaser.AUTO,
+    width: 1200,
+    height: 600,
+    parent: 'contenedorJuego',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 450 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var player;
+var pizzas;
+var bombs;
+var platforms;
+var picos; 
+var cursors;
+var score = 0;
+var vidas = 3;
+var gameOver = false;
+var scoreText;
+var vidasText;
+var nombreJugador;
+var nivelActual = 1;
+var nivelText;
+var cambiandoNivel = false;
+var textoTransicion;
+
+// Variables para la máscara y cupcake
+var mascara;
+var mascaraTimer;
+var mascaraTimerText;
+var tiempoRestanteMascara = 10;
+var mascaraEventTimer; 
+var cupcakeTimer;
+var cupcakeEventTimer;
+var tiempoRestanteCupcake = 20;
+var cupcakeTimerText;
+let saltando = true;
+
+// Variables para la lluvia de pizzas y bombas en el nivel 2
+var pizzaRainTimer;
+var bombRainTimer;
+
+// Variables para el timer de supervivencia del nivel 2
+var tiempoSupervivencia = 60; // 60 segundos = 1 minuto
+var supervivenciaTimer;
+var supervivenciaTimerText;
+
+var game = new Phaser.Game(config);
+
+function preload ()
+{
+    this.load.image('fondo1', 'assets/fondo1.png');
+    this.load.image('fondo2', 'assets/fondo2.png');
+    this.load.image('plataforma', 'assets/plataforma.png');
+    this.load.image('suelo', 'assets/plataforma1.png');
+    this.load.image('pizza', 'assets/pizza.png');
+    this.load.image('bomb', 'assets/foxy.png');
+    this.load.image('picos','assets/picos2.png'); 
+    this.load.image('mascara', 'assets/mascara.png'); 
+    this.load.image('cupcake', 'assets/cupcake.png'); 
+    this.load.spritesheet('guardia', 
+    'assets/guardiaSprites.png',
+    { frameWidth: 50, frameHeight: 50 });
+
+    this.load.audio('sonidoMoneda', './assets/sound/moneda.wav');
+    this.load.audio('sonidoFondo', './assets/sound/caja_musical.mp3');
+    this.load.audio('sonidoMascara', './assets/sound/springtrap.mp3');
+    this.load.audio('sonidoSalto', './assets/sound/salto.mp3');
+    this.load.audio('sonidoAterrizaje', './assets/sound/aterrizaje.mp3');
+    this.load.audio('sonidoMuerte', './assets/sound/muerte.mp3');
+    this.load.audio('sonidoVictoria', './assets/sound/victoria.wav');
+    this.load.audio('sonidoCupcake', './assets/sound/honk.wav');
+
+}
+
+function create ()
+{
+    this.musicaFondo = this.sound.add('sonidoFondo', {
+    volume: 0.8,
+    loop: true
+});
+this.musicaFondo.play();
+
+    //Obtener el nombre del jugador del localStorage
+    nombreJugador = localStorage.getItem('nombreJugador') || 'Jugador';
+    
+    //Fondos
+    if(nivelActual==1){
+        this.add.image(400, 300, 'fondo1');
+    }else if(nivelActual==2){
+        this.add.image(400, 600, 'fondo2');
+    }
+
+    // Creación del grupo de plataformas
+    platforms = this.physics.add.staticGroup();
+    
+    //Creación del grupo de picos
+    picos = this.physics.add.staticGroup();
+
+    if (nivelActual == 1) {
+        // Creación de las plataformas principales
+        platforms.create(400, 580, 'plataforma').setScale(2).refreshBody();
+        platforms.create(800, 580, 'plataforma').setScale(2).refreshBody();
+
+        // Diseño y distribución de las plataformas secundarias
+        platforms.create(600, 450, 'plataforma');
+        platforms.create(90, 350, 'plataforma');
+        platforms.create(400, 250, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(500, 330, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(750, 220, 'plataforma');
+        platforms.create(170, 120, 'plataforma');
+        platforms.create(1300, 120, 'plataforma');
+        platforms.create(1200, 400, 'plataforma');
+        platforms.create(1100, 300, 'suelo').setScale(0.6).refreshBody();
+
+        //Posiciones de los picos
+        let posicionesPicos = [
+            { x: 500, y: 525 },
+            { x: 550, y: 525 },
+            { x: 600, y: 525 },
+            { x: 650, y: 525 },
+            { x: 500, y: 410 },
+            { x: 550, y: 410 },
+            { x: 1100, y: 360 },
+            { x: 700, y: 180 },
+            { x: 750, y: 180 },
+
+        ];
+
+        //Agregar múltiples picos al grupo
+        posicionesPicos.forEach(pos => {
+            let pico = picos.create(pos.x, pos.y, 'picos');
+            pico.setSize(pico.width, pico.height / 2); //Reduce la hitbox
+            pico.setOffset(0, pico.height / 2); //Baja la hitbox
+        });
+    } else if (nivelActual == 2) {
+        //Segundo nivel 
+        // Creación de las plataformas principales
+        platforms.create(50, 540, 'plataforma');
+        platforms.create(600, 540, 'plataforma');
+        platforms.create(1150, 540, 'plataforma');
+
+        platforms.create(50, 570, 'plataforma');
+        platforms.create(600, 570, 'plataforma');
+        platforms.create(1150, 570, 'plataforma');
+
+        platforms.create(50, 590, 'plataforma');
+        platforms.create(600, 590, 'plataforma');
+        platforms.create(1150, 590, 'plataforma');
+
+        // Diseño y distribución de las plataformas secundarias 
+        platforms.create(600, 400, 'plataforma');
+        platforms.create(325, 430, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(875, 430, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(100, 350, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(130, 350, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(160, 350, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(1040, 350, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(1070, 350, 'suelo').setScale(0.6).refreshBody();
+        platforms.create(1100, 350, 'suelo').setScale(0.6).refreshBody();
+        
+        //Posiciones de los picos
+        let posicionesPicos = [
+            { x: 275, y: 580 },
+            { x: 325, y: 580 },
+            { x: 375, y: 580 },
+            { x: 825, y: 580 },
+            { x: 875, y: 580 },
+            { x: 925, y: 580 },
+        ];
+
+        //Agregar picos al grupo
+        posicionesPicos.forEach(pos => {
+            let pico = picos.create(pos.x, pos.y, 'picos');
+            pico.setSize(pico.width, pico.height / 2);
+            pico.setOffset(0, pico.height / 2);
+        });
+        
+        // Iniciar el temporizador de supervivencia para el nivel 2
+        tiempoSupervivencia = 60; // Reiniciar a 60 segundos
+        
+        // Crear el texto del temporizador de supervivencia
+        supervivenciaTimerText = this.add.text(600, 16, 'Sobrevive: 60s', { 
+            fontSize: '32px', 
+            fill: '#832', 
+            fontFamily: "Serif" 
+        }).setOrigin(0.5, 0);
+        
+        // Crear el temporizador de supervivencia
+        supervivenciaTimer = this.time.addEvent({
+            delay: 1000,
+            callback: actualizarTimerSupervivencia,
+            callbackScope: this,
+            repeat: 59 // Ejecutar 60 veces (0-59)
+        });
+    }
+
+    //Declaración del personaje principal
+    player = this.physics.add.sprite(100, 450, 'guardia');
+
+    // Propiedades de las físicas del personaje principal
+    player.setCollideWorldBounds(true);
+
+    // Animaciones del personaje principal
+    this.anims.create({
+        key: 'left',
+        frames: this.anims.generateFrameNumbers('guardia', { start: 0, end: 3 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'turn',
+        frames: [ { key: 'guardia', frame: 4 } ],
+        frameRate: 20
+    });
+
+    this.anims.create({
+        key: 'right',
+        frames: this.anims.generateFrameNumbers('guardia', { start: 5, end: 8 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    // Eventos input del teclado
+    cursors = this.input.keyboard.createCursorKeys();
+
+    // Grupo de puntos a recolectar
+    pizzas = this.physics.add.group();
+
+    // En el nivel 1, crear pizzas normales
+    if (nivelActual == 1) {
+        pizzas = this.physics.add.group({
+            key: 'pizza',
+            repeat: 30, 
+            setXY: { x: 12, y: 0, stepX: 39 }
+        });
+
+        pizzas.children.iterate(function (child) {
+            // Dar a cada pizza un rebote distinto
+            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        });
+    } else if (nivelActual == 2) {
+        // En el nivel 2, iniciar los temporizadores para que caigan pizzas y bombas
+        pizzaRainTimer = this.time.addEvent({
+            delay: 500, // Cada 500ms cae una pizza
+            callback: crearPizzasLluvia,
+            callbackScope: this,
+            loop: true
+        });
+        
+        bombRainTimer = this.time.addEvent({
+            delay: 3000, // Cada 3 segundos cae una bomba
+            callback: crearBombasLluvia,
+            callbackScope: this,
+            loop: true
+        });
+
+        // Iniciar el temporizador del cupcake
+        cupcakeEventTimer = this.time.delayedCall(20000, function() {
+            createCupcake.call(this);
+        }, [], this);
+
+    }
+
+    // Crear grupo para la máscara y cupcake (inicialmente vacío)
+    mascara = this.physics.add.group();
+    cupcake = this.physics.add.group();
+    // Grupo para las bombas
+    bombs = this.physics.add.group();
+
+    // Puntaje y vidas 
+    scoreText = this.add.text(16, 16, 'Puntos: ' + score, { fontSize: '32px', fill: '#832', fontFamily: "Serif" });
+    vidasText = this.add.text(16, 56, 'Vidas: ' + vidas, { fontSize: '32px', fill: '#832', fontFamily: "Serif" });
+    nivelText = this.add.text(196, 16, 'Nivel: ' + nivelActual, { fontSize: '32px', fill: '#832', fontFamily: "Serif" });
+
+    // Texto para el temporizador de la máscara (inicialmente invisible)
+    mascaraTimerText = this.add.text(196, 56, 'Máscara: 10s', { 
+        fontSize: '32px', 
+        fill: '#832', 
+        fontFamily: "Serif"
+    });
+
+    mascaraTimerText.setVisible(false);
+
+    // Texto para el temporizador del cupcake (inicialmente invisible)
+    cupcakeTimerText = this.add.text(16, 96, 'Cupcake: 20s', { 
+        fontSize: '32px', 
+        fill: '#832', 
+        fontFamily: "Serif"
+    });
+    cupcakeTimerText.setVisible(false);
+
+
+    // Colisiones
+    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(pizzas, platforms);
+    this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(mascara, platforms);
+    this.physics.add.collider(cupcake, platforms);
+
+    // Checar si el personaje principal colisiona con los puntos a recolectar o las bombas
+    this.physics.add.overlap(player, pizzas, collectStar, null, this);
+    this.physics.add.collider(player, bombs, hitBomb, null, this);
+    this.physics.add.overlap(player, mascara, collectMascara, null, this);
+    this.physics.add.overlap(player, cupcake, collectCupcake, null, this);
+    this.physics.add.overlap(player, picos, hitPicos, null, this);
+    
+    //Colisión con los picos
+    this.physics.add.collider(pizzas, picos, pizzaPicos, null, this);
+
+    // Crear la primera máscara y cupcake (cupcake solo en el nivel 2)
+    planificarSiguienteMascara.call(this);
+
+}
+
+// Función para actualizar el timer de supervivencia en el nivel 2
+function actualizarTimerSupervivencia() {
+    tiempoSupervivencia--;
+    
+    if (tiempoSupervivencia >= 0) {
+        supervivenciaTimerText.setText('Sobrevive: ' + tiempoSupervivencia + 's');
+        
+        // Si el tiempo llega a cero, el jugador gana
+        if (tiempoSupervivencia === 0) {
+            nivelCompletado.call(this);
+        }
+    }
+}
+
+// Función para manejar la victoria del nivel 2
+function nivelCompletado() {
+    // Pausar la física
+    this.physics.pause();
+    
+    // Detener los temporizadores
+    if (pizzaRainTimer) pizzaRainTimer.remove();
+    if (bombRainTimer) bombRainTimer.remove();
+    if (mascaraTimer) mascaraTimer.remove();
+    if (mascaraEventTimer) mascaraEventTimer.remove();
+    if (supervivenciaTimer) supervivenciaTimer.remove();
+    if (cupcakeTimer) cupcakeTimer.remove();
+    if(cupcakeEventTimer) cupcakeEventTimer.remove();
+    
+    // Reproducir sonido de victoria (si existe)
+    this.sound.add('sonidoVictoria').play();
+    
+    // Mostrar mensaje de victoria
+    let victoriaText = this.add.text(600, 300, '¡NIVEL COMPLETADO!', {
+        fontSize: '64px',
+        fill: '#832',
+        fontFamily: "Serif"
+    }).setOrigin(0.5);
+    
+    // Guardar el puntaje en localStorage
+    guardarPuntaje(nombreJugador, score);
+    
+    // Redirigir a la pantalla de felicitación después de 10 segundos
+    this.time.delayedCall(10000, function() {
+        window.location.href = 'felicitacion.html';
+    });
+}
+
+// Crear pizzas que caen del cielo (nivel 2)
+function crearPizzasLluvia() {
+    // Solo si estamos en el nivel 2
+    if (nivelActual !== 2) return;
+    
+    // Crear una pizza en una posición X aleatoria en la parte superior
+    var x = Phaser.Math.Between(50, 1150);
+    var pizza = pizzas.create(x, 0, 'pizza');
+    
+    // Añadir física y velocidad
+    pizza.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    pizza.setVelocityX(Phaser.Math.Between(-50, 50));
+    
+    // Eliminar la pizza después de 15 segundos si no ha sido recogida
+    this.time.delayedCall(15000, function() {
+        if (pizza.active) {
+            pizza.destroy();
+        }
+    });
+}
+
+// Crear bombas que caen del cielo (nivel 2)
+function crearBombasLluvia() {
+    // Solo si estamos en el nivel 2
+    if (nivelActual !== 2) return;
+    
+    // Crear una bomba en una posición X aleatoria en la parte superior
+    var x = Phaser.Math.Between(50, 1150);
+    var bomb = bombs.create(x, 0, 'bomb');
+    
+    // Añadir física y velocidad
+    bomb.setBounce(1);
+    bomb.setCollideWorldBounds(true);
+    bomb.setVelocityX(Phaser.Math.Between(-100, 100));
+    
+    // Eliminar la bomba después de 15 segundos
+    this.time.delayedCall(15000, function() {
+        if (bomb.active) {
+            bomb.destroy();
+        }
+    });
+}
+
+function update ()
+{
+    if (cambiandoNivel) {
+        return; // No procesar el update si estamos cambiando de nivel
+    }
+
+    if(cursors.left.isDown)
+    {
+        player.setVelocityX(-160);
+        player.anims.play('left', true);
+    }
+    else if(cursors.right.isDown)
+    {
+        player.setVelocityX(160);
+        player.anims.play('right', true);
+    }
+    else
+    {
+        player.setVelocityX(0);
+        player.anims.play('turn');
+    }
+
+    if(cursors.up.isDown && player.body.touching.down)
+    {
+        this.sound.add('sonidoSalto').play();
+        player.setVelocityY(-330);
+    }
+
+    if(cursors.down.isDown)
+    {
+        player.setVelocityY(330);
+    }
+
+    scoreText.setText('Puntos: ' + score);
+    vidasText.setText('Vidas: ' + vidas);
+    nivelText.setText('Nivel: ' + nivelActual);
+
+    if(gameOver)
+    {
+        vidas -= 1;
+        gameOver = false;
+        
+        if(vidas <= 0) {
+            //Detener los temporizadores de lluvia si están activos
+            if (pizzaRainTimer) pizzaRainTimer.remove();
+            if (bombRainTimer) bombRainTimer.remove();
+            if (supervivenciaTimer) supervivenciaTimer.remove();
+            
+            //Guardar el puntaje en localStorage cuando se acaban las vidas
+            guardarPuntaje(nombreJugador, score);
+            
+            //Redirigir a la pantalla de muerte
+            window.location.href = 'gameOver.html';
+        } else {
+            this.physics.resume();
+            player.x = 100;
+            player.y = 450;
+        }
+    }
+
+    if (!player.body.touching.down) 
+        saltando = true;
+    else
+    {
+        if(saltando)
+        {
+            //Si el personaje estaba saltando y luego toca el suelo se reproduce el sonido de aterrizaje
+            this.sound.add('sonidoAterrizaje').play();
+            saltando = false;
+        }
+    }
+}
+
+function collectStar (player, pizza)
+{
+    pizza.disableBody(true, true);
+
+    //Reproducir un sonido cada que se recoja una moneda (pizza)
+    this.sound.add('sonidoMoneda').play();
+
+    // Añadir y actualizar el puntaje
+    score += 10;
+
+    // Solo en el nivel 1 verificamos si no quedan pizzas para pasar al siguiente nivel
+    if(nivelActual == 1 && pizzas.countActive(true) === 0)
+    {
+        cambiarNivel.call(this);
+    }
+}
+
+function cambiarNivel() {
+    // Marca que estamos cambiando de nivel para detener el update
+    cambiandoNivel = true;
+    
+    // Pausa la física
+    this.physics.pause();
+    
+    // Muestra mensaje de transición
+    textoTransicion = this.add.text(600, 180, '¡NIVEL ' + (nivelActual + 1) + '!', {
+        fontSize: '64px',
+        fill: '#832',
+        fontFamily: "Serif"
+    }).setOrigin(0.5);
+    
+    // Limpia todos los elementos existentes
+    if (mascaraTimer) mascaraTimer.remove();
+    if (mascaraEventTimer) mascaraEventTimer.remove();
+    
+    // Incrementa el nivel
+    nivelActual++;
+    
+    // Después de una pausa, recarga la escena
+    this.time.delayedCall(2000, function() {
+        pizzas.clear(true, true);
+        bombs.clear(true, true);
+        mascara.clear(true, true);
+        platforms.clear(true, true);
+        picos.clear(true, true);
+        
+        // Vuelve a crear todo para el nuevo nivel
+        create.call(this);
+        
+        // Restaura la física
+        this.physics.resume();
+        
+        // Elimina el texto de transición
+        textoTransicion.destroy();
+        
+        // Desactiva la bandera de cambio de nivel
+        cambiandoNivel = false;
+    }, [], this);
+}
+
+function collectMascara (player, mascaraObj)
+{
+    mascaraObj.disableBody(true, true);
+
+    this.sound.add('sonidoMascara').play();
+
+    // Añadir y actualizar el puntaje (la máscara da más puntos que las pizzas)
+    score += 50;
+    
+    // Ocultar el texto del temporizador cuando se recoge la máscara
+    mascaraTimerText.setVisible(false);
+    
+    // Limpiar el temporizador de la máscara si existe
+    if (mascaraTimer) {
+        mascaraTimer.remove();
+    }
+    
+    // Programar la siguiente aparición de la máscara en 10 segundos
+    planificarSiguienteMascara.call(this);
+}
+
+function collectCupcake (player, cupcakeObj)
+{
+    cupcakeObj.disableBody(true, true);
+
+    this.sound.add('sonidoCupcake').play();
+
+    score += 100;
+    
+    // Ocultar el texto del temporizador cuando se recoge el cupcake
+    cupcakeTimerText.setVisible(false);
+    
+    // Limpiar el temporizador del cupcake si existe
+    if (cupcakeTimer) {
+        cupcakeTimer.remove();
+    }
+    
+    // El cupcake solo aparece una vez en el segundo nivel, por eso esta linea está comentada
+    //planificarSiguienteCupcake.call(this);
+}
+
+function hitBomb (player, bomb)
+{
+    this.physics.pause();
+    this.sound.add('sonidoMuerte').play();
+    player.anims.play('turn');
+    gameOver = true;
+}
+
+function hitPicos (player, pico)
+{
+    this.sound.add('sonidoMuerte').play();
+    this.physics.pause();
+    player.anims.play('turn');
+    gameOver = true;
+}
+
+function pizzaPicos(pizzas,pico){
+    pizzas.disableBody(true, true);
+}
+
+// Función para crear la máscara
+function createMascara() {
+    // Si ya existe una máscara activa, eliminarla
+    mascara.clear(true, true);
+    
+    // Reiniciar el temporizador
+    tiempoRestanteMascara = 10;
+    
+    // Posición aleatoria para la máscara
+    var x = Phaser.Math.Between(100, 1100);
+    var y = Phaser.Math.Between(50, 300);
+    
+    // Crear la máscara
+    var mascaraObj = mascara.create(x, y, 'mascara');
+    mascaraObj.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    
+    // Mostrar el texto del temporizador
+    mascaraTimerText.setVisible(true);
+    mascaraTimerText.setText('Máscara: 10s');
+    
+    // Actualizar el texto del temporizador cada segundo
+    if (mascaraTimer) {
+        mascaraTimer.remove();
+    }
+    
+    mascaraTimer = this.time.addEvent({
+        delay: 1000,
+        callback: updateMascaraTimer,
+        callbackScope: this,
+        repeat: 9 // Ejecutar 10 veces (0-9)
+    });
+    
+    // Eliminar la máscara después de 10 segundos si no ha sido recogida
+    // y programar la siguiente
+    this.time.delayedCall(10000, function() {
+        if (mascara.countActive() > 0) {
+            mascara.clear(true, true);
+            mascaraTimerText.setVisible(false);
+            
+            // Programar la siguiente aparición de la máscara
+            planificarSiguienteMascara.call(this);
+        }
+    }, [], this);
+}
+
+// Función para crear el cupcake
+function createCupcake() {
+    // Si ya existe un cupcake activo, eliminarlo
+    cupcake.clear(true, true);
+    
+    // Reiniciar el temporizador
+    tiempoRestanteCupcake = 20;
+    
+    // Posición aleatoria para el cupcake
+    var x = Phaser.Math.Between(100, 1100);
+    var y = Phaser.Math.Between(50, 300);
+    
+    // Crear el cupcake
+    var cupcakeObj = cupcake.create(x, y, 'cupcake');
+    cupcakeObj.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    
+    // Mostrar el texto del temporizador
+    cupcakeTimerText.setVisible(true);
+    cupcakeTimerText.setText('Cupcake: 20s');
+    
+    // Actualizar el texto del temporizador cada segundo
+    if (cupcakeTimer) {
+        cupcakeTimer.remove();
+    }
+    
+    cupcakeTimer = this.time.addEvent({
+        delay: 1000,
+        callback: updateCupcakeTimer,
+        callbackScope: this,
+        repeat: 19 // Ejecutar 20 veces (0-19)
+    });
+    
+    // Eliminar el cupcake después de 20 segundos si no ha sido recogido
+ 
+    this.time.delayedCall(20000, function() {
+        if (cupcake.countActive() > 0) {
+            cupcake.clear(true, true);
+            cupcakeTimerText.setVisible(false);
+            
+            // Programar el siguiente cupcake (Esta linea se comenta porque solo se tiene planeado que aparezca un cupcake en toda la partida)
+            //planificarSiguienteCupcake.call(this);
+        }
+    }, [], this);
+}
+
+// Función para actualizar el temporizador de la máscara
+function updateMascaraTimer() {
+    tiempoRestanteMascara--;
+    
+    if (tiempoRestanteMascara > 0 && mascara.countActive() > 0) {
+        // Actualizar el texto
+        mascaraTimerText.setText('Máscara: ' + tiempoRestanteMascara + 's');
+    } else {
+        mascaraTimerText.setVisible(false);
+    }
+}
+
+// Función para actualizar el temporizador del cupcake
+function updateCupcakeTimer() {
+    tiempoRestanteCupcake--;
+    
+    if (tiempoRestanteCupcake > 0 && cupcake.countActive() > 0) {
+        // Actualizar el texto
+        cupcakeTimerText.setText('Cupcake: ' + tiempoRestanteCupcake + 's');
+    } else {
+        cupcakeTimerText.setVisible(false);
+    }
+}
+
+// Nueva función para programar la siguiente aparición de la máscara
+function planificarSiguienteMascara() {
+    // Eliminar el temporizador anterior si existe
+    if (mascaraEventTimer) {
+        mascaraEventTimer.remove();
+    }
+    
+    // Crear un nuevo temporizador para la próxima aparición
+    mascaraEventTimer = this.time.delayedCall(10000, function() {
+        createMascara.call(this);
+    }, [], this);
+}
+
+// Nueva función para programar la siguiente aparición del cupcake
+function planificarSiguienteCupcake() {
+    // Eliminar el temporizador anterior si existe
+    if (cupcakeEventTimer) {
+        cupcakeEventTimer.remove();
+    }
+    
+    // Crear un nuevo temporizador para la próxima aparición
+    cupcakeEventTimer = this.time.delayedCall(20000, function() {
+        createCupcake.call(this);
+    }, [], this);
+}
+
+//Función para guardar el puntaje en localStorage
+function guardarPuntaje(nombre, puntos) {
+    //Obtener los puntajes existentes o crear un array vacío si no hay ninguno
+    let puntajes = [];
+    
+    try {
+        const puntajesGuardados = localStorage.getItem('puntajes');
+        if(puntajesGuardados) {
+            puntajes = JSON.parse(puntajesGuardados);
+        }
+    } catch (error) {
+        console.error('Error al leer puntajes del localStorage:', error);
+        puntajes = [];
+    }
+    
+    //Añadir el nuevo puntaje
+    puntajes.push({
+        nombre: nombre,
+        puntaje: puntos,
+    });
+    
+    //Ordenar los puntajes de mayor a menor
+    //puntajes.sort((a, b) => b.puntaje - a.puntaje);
+    
+    //Limitar a los 10 mejores puntajes (opcional)
+    if(puntajes.length > 10) {
+        puntajes = puntajes.slice(0, 10);
+    }
+    
+    //Guardar los puntajes actualizados en localStorage
+    localStorage.setItem('puntajes', JSON.stringify(puntajes));
+    
+    console.log('Puntaje guardado correctamente:', nombre, puntos);
+}
+</script>
+</div> 
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2 Noches con Alfredo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Micro+5&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="estilosFelicitacion.css">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>¡FELICIDADES!</h1>
+        <h2>Has sobrevivido a las 2 noches con Alfredo</h2>
+        
+        <div class="puntuacion">
+            Tu puntuación final: <span id="puntuacionFinal">0</span>
+        </div>
+        
+        <div class="botones">
+            <div class="volver">
+                <a href="juegoPrincipal.html">
+                    <img src="assets/jugarDeNuevo.png" alt="Jugar de Nuevo">
+                </a>
+            </div>
+            <div class="volver">
+                <a href="menu.html">
+                    <img src="assets/volverAlMenu.png" alt="Volver">
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Obtener los puntajes del localStorage
+            try {
+                const puntajes = JSON.parse(localStorage.getItem('puntajes')) || [];
+                
+                // Obtener el último puntaje agregado (el más reciente)
+                if (puntajes.length > 0) {
+                    const ultimoPuntaje = puntajes[puntajes.length - 1];
+                    document.getElementById('puntuacionFinal').textContent = ultimoPuntaje.puntaje;
+                }
+            } catch (error) {
+                console.error('Error al leer puntajes:', error);
+            }
+            
+            // Reproducir sonido de victoria (opcional)
+            const sonidoVictoria = new Audio('./assets/sound/victoria.mp3');
+            sonidoVictoria.volume = 0.8;
+            sonidoVictoria.play();
+        });
+    </script>
+</body>
+</html>

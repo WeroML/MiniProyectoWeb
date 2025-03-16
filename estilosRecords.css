@@ -1,0 +1,206 @@
+body {
+    background-image: url('assets/arcade.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.mensaje-vacio {
+    color: #00ffff;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    font-family: 'Micro 5', cursive;
+    font-size: 18px;
+    text-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff;
+    animation: pulsate 1.5s infinite alternate;
+}
+
+
+.contenedor-records {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.titulo {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: -60px;
+}
+
+.titulo img {
+    max-width: 90%;
+    height: auto;
+}
+
+.tabla-records {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0px 0px 20px rgba(255, 0, 0, 0.5);
+    max-width: 650px;
+    width: 90%;
+    margin-bottom: 30px;
+    border: 2px solid rgba(255, 0, 0, 0.5);
+}
+
+.tabla-records h2 {
+    color: #8f0404;
+    text-align: center;
+    font-size: 42px;
+    margin-top: 15px;
+    font-family: "Micro 5", sans-serif;
+    text-shadow: 0 0 10px rgba(161, 1, 1, 0.7), 0 0 20px rgba(255, 0, 0, 0.4);
+    letter-spacing: 2px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    color: rgb(255, 255, 255);
+}
+
+th, td {
+    padding: 15px;
+    text-align: center;
+}
+
+th {
+    background-color: rgba(146, 9, 9, 0.9);
+    font-size: 25px;
+    font-family: "Micro 5", sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+th:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+th:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+tr {
+    transition: all 0.3s ease;
+}
+
+tbody tr {
+    background-color: rgba(0, 0, 50, 0.5);
+    margin-bottom: 5px;
+    
+}
+
+tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 80, 0.5);
+}
+
+tbody tr:hover {
+    background-color: rgba(119, 0, 0, 0.7);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(255, 6, 6, 0.5);
+}
+
+td {
+    border: none;
+    font-family: "Micro 5", sans-serif;
+    font-weight: 500;
+    font-size: 25px;
+}
+
+td:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+td:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.posicion {
+    font-weight: bold;
+    font-size: 22px;
+    font-family: "Micro 5", sans-serif;
+}
+
+.primer-lugar {
+    color: gold;
+    text-shadow: 0 0 10px gold;
+}
+
+.segundo-lugar {
+    color: silver;
+    text-shadow: 0 0 8px silver;
+}
+
+.tercer-lugar {
+    color: #ff9c41; /* bronce más brillante */
+    text-shadow: 0 0 8px #cd7f32;
+}
+
+.boton-volver {
+    margin-top: 30px;
+    position: relative;
+    display: inline-block;
+}
+
+.boton-volver img {
+    width: 180px;
+    height: auto;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(161, 1, 1, 0.7));
+}
+
+.boton-volver:hover img {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(189, 0, 0, 0.7));
+}
+
+.boton-volver::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    transition: width 0.3s ease;
+}
+
+.boton-volver:hover::after {
+    width: 80%;
+}
+
+@media (max-width: 600px) {
+    .tabla-records {
+        padding: 15px;
+        width: 95%;
+    }
+    
+    .tabla-records h2 {
+        font-size: 32px;
+    }
+    
+    th, td {
+        padding: 10px 5px;
+        font-size: 14px;
+    }
+    
+    .posicion {
+        font-size: 18px;
+    }
+    
+    .boton-volver img {
+        width: 140px;
+    }
+}

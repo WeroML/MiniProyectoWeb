@@ -1,0 +1,16 @@
+body {
+    background-image: url('assets/arcade.png');
+    background-size: 100vw 100vh; /* Ancho completo y altura un poco menor para reducir el zoom */
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+#contenedorJuego {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    height: 100vh; /* Ocupa toda la pantalla */
+}
+canvas {
+    display: block; /* Evita márgenes extra en el canvas */
+}
